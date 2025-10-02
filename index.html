@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="fr" dir="ltr" data-lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Le Saint Coran - Lecture avec Tajweed</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400;1,700&family=Cairo:wght@200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <meta name="description" content="Application moderne du Coran avec coloration Tajweed, multilingue et responsive">
+    <meta name="theme-color" content="#1D4244">
+</head>
+<body data-color-scheme="light">
+    <!-- Loading Screen -->
+    <div id="loading-screen" class="loading-screen">
+        <div class="loading-content">
+            <div class="loading-logo">
+                <div class="quran-icon">📖</div>
+                <h1 data-i18n="app.title">Le Saint Coran</h1>
+                <p data-i18n="messages.loading">Chargement en cours...</p>
+            </div>
+            <div class="loading-progress">
+                <div class="progress-bar"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Application -->
+    <div id="app" class="app hidden">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content container">
+                <div class="header-brand">
+                    <div class="brand-icon">📖</div>
+                    <h1 class="brand-title" data-i18n="app.title">Le Saint Coran</h1>
+                    <p class="brand-subtitle" data-i18n="app.subtitle">Lecture avec Tajweed</p>
+                </div>
+                
+                <nav class="header-nav">
+                    <div class="language-selector">
+                        <button id="language-toggle" class="btn btn--secondary btn--sm language-btn" aria-label="Changer de langue">
+                            <span class="lang-flag">🇫🇷</span>
+                            <span class="lang-code">FR</span>
+                            <span class="dropdown-arrow">▾</span>
+                        </button>
+                        <div id="language-menu" class="language-menu hidden">
+                            <button class="language-option" data-lang="fr">
+                                <span class="lang-flag">🇫🇷</span>
+                                <span>Français</span>
+                            </button>
+                            <button class="language-option" data-lang="ar">
+                                <span class="lang-flag">🇸🇦</span>
+                                <span>العربية</span>
+                            </button>
+                            <button class="language-option" data-lang="en">
+                                <span class="lang-flag">🇬🇧</span>
+                                <span>English</span>
+                            </button>
+                        </div>
+                    </div>
+                    <button id="theme-toggle" class="btn btn--secondary btn--sm" aria-label="Changer de thème">
+                        <span class="theme-icon">🌙</span>
+                    </button>
+                    <button id="settings-btn" class="btn btn--secondary btn--sm" data-i18n-aria="settings.title">
+                        ⚙️
+                    </button>
+                    <button id="sidebar-toggle" class="btn btn--secondary btn--sm sidebar-toggle" data-i18n-aria="navigation.menu">
+                        ☰
+                    </button>
+                </nav>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main">
+            <!-- Audio Player -->
+            <div class="audio-player">
+                <div class="player-content container">
+                    <div class="player-controls">
+                        <button id="prev-btn" class="control-btn" data-i18n-aria="navigation.previous">⏮️</button>
+                        <button id="play-pause-btn" class="control-btn control-btn--primary" data-i18n-aria="player.play">▶️</button>
+                        <button id="next-btn" class="control-btn" data-i18n-aria="navigation.next">⏭️</button>
+                    </div>
+                    
+                    <div class="player-info">
+                        <div class="player-progress">
+                            <audio id="audio-player" preload="none"></audio>
+                            <div class="progress-container">
+                                <div id="audio-progress" class="progress-track">
+                                    <div id="progress-bar" class="progress-fill"></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="player-details">
+                            <span id="current-reciter">مشاري العفاسي</span>
+                            <span class="separator">•</span>
+                            <span id="audio-status" data-i18n="player.ready">Prêt</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Content Area -->
+            <div class="content-area">
+                <div class="container">
+                    <!-- Surah Selection -->
+                    <div class="surah-selection">
+                        <div class="selection-group">
+                            <label for="surah-select" class="form-label" data-i18n="navigation.selectSurah">Choisir la sourate:</label>
+                            <select id="surah-select" class="form-control surah-select">
+                                <!-- Options will be populated by JavaScript -->
+                            </select>
+                        </div>
+                        
+                        <div class="selection-group">
+                            <label for="verse-select" class="form-label" data-i18n="navigation.selectVerse">Choisir le verset:</label>
+                            <select id="verse-select" class="form-control verse-select" disabled>
+                                <!-- Options will be populated by JavaScript -->
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Verse Display -->
+                    <div class="verse-container">
+                        <div class="verse-header">
+                            <div class="verse-info">
+                                <span id="current-surah-name" class="surah-name">سُورَةُ ٱلْفَاتِحَةِ</span>
+                                <span class="verse-number"><span data-i18n="navigation.verse">Verset</span> <span id="current-verse-number">1</span></span>
+                            </div>
+                            
+                            <div class="verse-actions">
+                                <button id="favorite-btn" class="action-btn" data-i18n-aria="navigation.favorites">⭐</button>
+                                <button id="share-btn" class="action-btn" data-i18n-aria="navigation.share">📤</button>
+                                <button id="copy-btn" class="action-btn" data-i18n-aria="navigation.copy">📋</button>
+                            </div>
+                        </div>
+                        
+                        <div class="verse-content">
+                            <div id="arabic-text" class="arabic-text" dir="rtl">
+                                <!-- Arabic verse text will be populated by JavaScript -->
+                            </div>
+                            
+                            <div id="french-translation" class="translation">
+                                <!-- Translation will be populated by JavaScript -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Navigation -->
+                    <div class="verse-navigation">
+                        <button id="prev-verse-btn" class="btn btn--outline nav-btn">
+                            <span class="nav-arrow">⬅️</span>
+                            <span data-i18n="navigation.previous">Précédent</span>
+                        </button>
+                        
+                        <div class="verse-counter">
+                            <span id="verse-counter-text">1 de 7</span>
+                        </div>
+                        
+                        <button id="next-verse-btn" class="btn btn--outline nav-btn">
+                            <span data-i18n="navigation.next">Suivant</span>
+                            <span class="nav-arrow">➡️</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Sidebar -->
+        <aside id="sidebar" class="sidebar">
+            <div class="sidebar-header">
+                <h3 data-i18n="navigation.menu">Menu</h3>
+                <button id="sidebar-close" class="btn btn--secondary btn--sm">✕</button>
+            </div>
+            
+            <div class="sidebar-content">
+                <!-- Search -->
+                <div class="search-section">
+                    <h4 data-i18n="navigation.search">Recherche</h4>
+                    <div class="search-container">
+                        <input type="text" id="search-input" class="form-control" data-i18n-placeholder="navigation.searchPlaceholder" placeholder="Rechercher dans le Coran...">
+                        <button id="search-btn" class="btn btn--primary btn--sm">🔍</button>
+                    </div>
+                    <div id="search-results" class="search-results hidden"></div>
+                </div>
+
+                <!-- Favorites -->
+                <div class="favorites-section">
+                    <h4 data-i18n="navigation.favorites">Favoris</h4>
+                    <div id="favorites-list" class="favorites-list">
+                        <p class="empty-state" data-i18n="messages.noFavorites">Aucun favori</p>
+                    </div>
+                </div>
+
+                <!-- Quick Navigation -->
+                <div class="quick-nav-section">
+                    <h4 data-i18n="navigation.quickNav">Navigation rapide</h4>
+                    <div class="quick-nav-grid">
+                        <button class="quick-nav-btn" data-surah="1">الفاتحة</button>
+                        <button class="quick-nav-btn" data-surah="2">البقرة</button>
+                        <button class="quick-nav-btn" data-surah="18">الكهف</button>
+                        <button class="quick-nav-btn" data-surah="36">يس</button>
+                        <button class="quick-nav-btn" data-surah="67">الملك</button>
+                        <button class="quick-nav-btn" data-surah="114">الناس</button>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Modals -->
+        <!-- Settings Modal -->
+        <div id="settings-modal" class="modal hidden">
+            <div class="modal-overlay"></div>
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 data-i18n="settings.title">Paramètres</h3>
+                    <button class="modal-close btn btn--secondary btn--sm">✕</button>
+                </div>
+                
+                <div class="modal-body">
+                    <!-- Font Size -->
+                    <div class="setting-group">
+                        <label class="form-label" data-i18n="settings.fontSize">Taille de police:</label>
+                        <div class="font-controls">
+                            <button id="font-decrease" class="btn btn--outline btn--sm">أ-</button>
+                            <span id="font-size-display" class="font-display">Moyen</span>
+                            <button id="font-increase" class="btn btn--outline btn--sm">أ+</button>
+                        </div>
+                    </div>
+
+                    <!-- Reciter Selection -->
+                    <div class="setting-group">
+                        <label for="reciter-select" class="form-label" data-i18n="settings.reciter">Récitateur:</label>
+                        <select id="reciter-select" class="form-control">
+                            <!-- Options will be populated by JavaScript -->
+                        </select>
+                    </div>
+
+                    <!-- Playback Speed -->
+                    <div class="setting-group">
+                        <label for="playback-speed" class="form-label" data-i18n="settings.playbackSpeed">Vitesse de lecture:</label>
+                        <select id="playback-speed" class="form-control">
+                            <option value="0.5">0.5x</option>
+                            <option value="0.75">0.75x</option>
+                            <option value="1" selected>1x</option>
+                            <option value="1.25">1.25x</option>
+                            <option value="1.5">1.5x</option>
+                        </select>
+                    </div>
+
+                    <!-- Auto-play -->
+                    <div class="setting-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="auto-play" class="checkbox">
+                            <span class="checkmark"></span>
+                            <span data-i18n="settings.autoPlay">Lecture automatique</span>
+                        </label>
+                    </div>
+
+                    <!-- Night Mode -->
+                    <div class="setting-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="night-mode" class="checkbox">
+                            <span class="checkmark"></span>
+                            <span data-i18n="settings.nightMode">Mode lecture nocturne</span>
+                        </label>
+                    </div>
+
+                    <!-- Tajweed Legend -->
+                    <div class="setting-group">
+                        <button id="tajweed-legend-btn" class="btn btn--secondary btn--full-width" data-i18n="tajweed.showLegend">
+                            Afficher le guide des couleurs Tajweed
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tajweed Legend Modal -->
+        <div id="tajweed-modal" class="modal hidden">
+            <div class="modal-overlay"></div>
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 data-i18n="tajweed.title">Règles de Tajweed</h3>
+                    <button class="modal-close btn btn--secondary btn--sm">✕</button>
+                </div>
+                
+                <div class="modal-body">
+                    <div id="tajweed-legend" class="tajweed-legend">
+                        <!-- Legend items will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer with Developer Credits -->
+        <footer class="footer">
+            <div class="container">
+                <div class="footer-content">
+                    <div class="footer-main">
+                        <div class="footer-info">
+                            <p data-i18n="footer.appDescription">Application moderne du Saint Coran avec règles de Tajweed</p>
+                            <p data-i18n="footer.features">Lecture audio, traductions et interface multilingue</p>
+                        </div>
+                        
+                        <div class="footer-links">
+                            <button id="about-btn" class="footer-link" data-i18n="footer.about">À propos</button>
+                            <button id="help-btn" class="footer-link" data-i18n="footer.help">Aide</button>
+                            <button id="contact-btn" class="footer-link" data-i18n="footer.contact">Contact</button>
+                        </div>
+                    </div>
+                    
+                    <div class="developer-credits">
+                        <div class="credits-badge">
+                            <span data-i18n="footer.developedBy">Développé avec ❤️ par</span>
+                            <a href="https://www.linkedin.com/in/samir-tastift/" target="_blank" class="developer-link">
+                                <strong>Samir TASTIFT</strong>
+                            </a>
+                        </div>
+                        <div class="ummah-badge">
+                            <span data-i18n="footer.forUmmah">pour la Oummah</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Overlay for mobile sidebar -->
+    <div id="sidebar-overlay" class="sidebar-overlay hidden"></div>
+
+    <!-- Toast Container -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <script src="app.js"></script>
+</body>
+</html>
